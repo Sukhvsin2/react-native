@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import { View, Text, StyleSheet, Dimensions, LogBox } from 'react-native'
+import { SafeAreaView, Text, StyleSheet, Dimensions, LogBox } from 'react-native'
 import {  TextInput } from 'react-native-paper';
 import * as Yup from "yup";
 import { Formik, ErrorMessage } from "formik";
@@ -27,7 +27,7 @@ export default function QuickSignup() {
     }
 
     return (
-        <View>
+        <SafeAreaView style={{ flex: 1, maxHeight: 500}}>
             <Formik enableReinitialize initialValues={{
                 fullname : '',
                 email : "",
@@ -89,7 +89,7 @@ export default function QuickSignup() {
                 </Portal>
 
             </Provider>
-        </View>
+        </SafeAreaView>
     )
 }
 

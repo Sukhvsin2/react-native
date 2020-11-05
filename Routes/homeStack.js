@@ -5,6 +5,7 @@ import Register from "../views/Register";
 import Home from "../views/Home";
 
 
+
 const screens = {
     Login: {
         screen: Login,
@@ -22,6 +23,9 @@ const screens = {
         },
     }
 }
+
+
+
 
 const HomeStack = createStackNavigator(screens);
 

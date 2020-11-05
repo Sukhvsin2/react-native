@@ -3,8 +3,9 @@ import { StyleSheet, View, Text, Image, SafeAreaView, Dimensions, TouchableOpaci
 import { Button, TextInput } from 'react-native-paper';
 import axios from "axios";
 import urls from '../axios/config';
-import {ErrorMessage, Formik } from "formik"
-// import { getBuildId } from 'react-native-device-info';
+import { ErrorMessage, Formik } from "formik";
+import { NavigationActions, StackActions } from "react-navigation";
+import DeviceInfo from 'react-native-device-info';
 import * as Yup from "yup";
 
 
@@ -28,10 +29,14 @@ export default function Login({navigation}) {
                 validationSchema={validationSchema}
                 onSubmit={(values, { resetForm }) => {
                     console.log(values);
+                    let deviceId = '';
+                    // DeviceInfo.getUniqueId().then(id => {
+                    //     deviceId = id;
+                    // });
                     const data = {
                         username: values.phone,
                         password: values.password,
-                        // deviceId: getBuildId,
+                        // deviceId: id,
                     }
                     axios.post(urls + '/user/login/', data).then(res => console.log("res", res)).catch(e => console.log(e));
                     resetForm({ phone: '', password: ''});
@@ -52,7 +57,11 @@ export default function Login({navigation}) {
                                 Login
                             </Button>
                             <TouchableOpacity onPress={() => {
-                                navigation.navigate('Home');
+                                const resetAction = StackActions.reset({
+                                    index: 0,
+                                    actions: [NavigationActions.navigate({ routeName: 'Home' })],
+                                });
+                                navigation.dispatch(resetAction)
                             }} style={styles.create}>
                                 <Text style={{fontSize: 16}}>Home</Text>
                             </TouchableOpacity>
