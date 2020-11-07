@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { StyleSheet, View, Text, Image, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import axios from "axios";
@@ -8,16 +8,16 @@ import { NavigationActions, StackActions } from "react-navigation";
 import * as Yup from "yup";
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getItem } from 'react-native-shared-preferences';
+import Loader from "./components/Loader";
 
 const { width: WIDTH } = Dimensions.get('window');
 
 
 export default function Login({ navigation }) {
-    
+    const [visible, setvisible] = useState(false)
+
     async function loginCheck() {
         let login = await AsyncStorage.getItem('loggedIn');
-        // AsyncStorage.setItem('pin', `false`);
         let getPin = await AsyncStorage.getItem('pin');
         console.log("check", getPin);
         if (login == 'true' && (getPin != 'false' || getPin != null)) {
@@ -31,8 +31,7 @@ export default function Login({ navigation }) {
 
     useEffect(() => {
         loginCheck();
-        
-    }, [])
+    }, [loginCheck])
 
     const validationSchema = Yup.object({
         phone: Yup.string().required('Required'),
@@ -41,6 +40,7 @@ export default function Login({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container}>
+            <Loader message='Loggin In' loading={visible} />
             <View style={styles.imageBackground}>
                 <Image style={styles.image} source={require('../assets/logo.png')}/>
             </View>
@@ -48,6 +48,7 @@ export default function Login({ navigation }) {
                 initialValues={{ phone: '', password: '' }}
                 validationSchema={validationSchema}
                 onSubmit={(values, { resetForm }) => {
+                    setvisible(visible => visible = true);
                     const data = {
                         username: '232'+values.phone,
                         password: values.password,
@@ -63,22 +64,23 @@ export default function Login({ navigation }) {
                             AsyncStorage.setItem('loggedIn', 'true');
                         }
                         
-                            if (pin == null || pin =='false') {
-                                const resetAction = StackActions.reset({
-                                    index: 0,
-                                    actions: [NavigationActions.navigate({ routeName: 'PinScreen' })],
-                                });
-                                navigation.dispatch(resetAction)
-                            } else {
-                                const resetAction = StackActions.reset({
-                                    index: 0,
-                                    actions: [NavigationActions.navigate({ routeName: 'Home' })],
-                                });
-                                navigation.dispatch(resetAction);
-                            }
+                        if (pin == null || pin =='false') {
+                            const resetAction = StackActions.reset({
+                                index: 0,
+                                actions: [NavigationActions.navigate({ routeName: 'PinScreen' })],
+                            });
+                            navigation.dispatch(resetAction)
+                        } else {
+                            const resetAction = StackActions.reset({
+                                index: 0,
+                                actions: [NavigationActions.navigate({ routeName: 'Home' })],
+                            });
+                            navigation.dispatch(resetAction);
+                        }
+                        setvisible(visible => visible = true);
                     }).catch(e => {
-                        console.log('err',e.message);
-                        console.log("cehck");
+                        console.log('err',e.response.data);
+                        setvisible(visible => visible = true);
                     });
                     resetForm({ phone: '', password: ''});
                 }}

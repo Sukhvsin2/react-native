@@ -1,18 +1,40 @@
 import React from 'react'
-import { View, SafeAreaView, StyleSheet, FlatList } from 'react-native'
+import { View, SafeAreaView, StyleSheet } from 'react-native'
 import { IconButton, TextInput } from 'react-native-paper';
 import OurButton from "../../components/OurButton";
+import axios from "axios";
+import { getPhone, getToken } from "../../../axios/auth"
+import urls from "../../../axios/config"
+import Loader from "../../components/Loader";
 
 export default function Group() {
+    const [visible, setvisible] = React.useState(false)
 
     const [counter, setcounter] = React.useState(3);
     const [customFields, setcustomFields] = React.useState([
-        {toUser: 'check', amount: '', key: 1},
-        {toUser: '', amount: '', key: 2}
+        {phone: '', amount: '', key: 1},
+        {phone: '', amount: '', key: 2}
     ]);
 
-    function handleSubmit() {
+    async function handleSubmit() {
         console.log(customFields);
+        setvisible(visible => visible = true);
+        try {
+            let token = await getToken();
+            let phone = await getPhone();
+            const data = {
+                senderphone: phone,
+                data: customFields,
+                typeofTransaction: 1,
+                featureName: 1
+            }
+            let res = axios.post(urls.BASE + 'user/group/transcation/',data, token);
+            console.log("grp",res.data);
+            setvisible(false);
+        } catch (error) {
+            console.log(error.response.data);
+            setvisible(false);
+        }
      }
 
     function handleChange(index, name, value) {
@@ -22,7 +44,7 @@ export default function Group() {
     }
 
     function addCustomField() {
-        setcustomFields([...customFields, { toUser: '', amount: '', key: counter }]);
+        setcustomFields([...customFields, { phone: '', amount: '', key: counter }]);
         setcounter(counter => counter++);
     }
 
@@ -38,7 +60,7 @@ export default function Group() {
         return customFields.map((customField, key) => {
             return (
                 <View key={key}>
-                    <TextInput style={styles.input} maxLength={8} keyboardType="numeric" value={customField.toUser}    onChangeText={event => handleChange(key, 'toUser', event)} label="Phone Number"/>
+                    <TextInput style={styles.input} maxLength={8} keyboardType="numeric" value={customField.phone}    onChangeText={event => handleChange(key, 'phone', event)} label="Phone Number"/>
                     <TextInput style={styles.input} label="Amount" keyboardType="numeric" value={customField.amount}    onChangeText={event => handleChange(key, 'amount', event)} />
                 </View>
             )
@@ -47,6 +69,7 @@ export default function Group() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <Loader message="Making Your Payment" loading={ visible }/>
             <View style={styles.container}>
                 {
                     customFields.map((customField, key) => {

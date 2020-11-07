@@ -99,7 +99,9 @@ export default function Home({navigation}) {
                         <Text style={styles.mainIconText}>Transfer</Text>
                     </View>
                     <View alignItems="center">
-                        <IconButton size={30} style={{borderRadius: 10, backgroundColor: '#E5C35C'}} color="#fff" icon="card"></IconButton>
+                        <IconButton onPress={() => {
+                            navigation.navigate('Payment');
+                        }} size={30} style={{borderRadius: 10, backgroundColor: '#E5C35C'}} color="#fff" icon="card"></IconButton>
                         <Text style={styles.mainIconText}>Pay</Text>
                     </View>
                     <View alignItems="center">

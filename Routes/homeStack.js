@@ -14,6 +14,9 @@ import ActualBalance from "../views/ActualBalance/ActualBalance";
 import AllTransactions from "../views/AllTransactions";
 import Scanner from "../views/Scanner";
 import Transfer from "../views/HomeScreens/Transfer";
+import Payment from "../views/HomeScreens/Payment/Payment";
+import Insurance from "../views/HomeScreens/Payment/Insurance";
+import ESDA from "../views/HomeScreens/Payment/ESDA";
 
 
 
@@ -70,16 +73,20 @@ const screens = {
         }
     },
     Transfer: {
-        screen: Transfer,
-        navigationOptions: {
-            tabBarLevel: () => {
-                <View><Text>Check</Text></View>
-             }
-        }
+        screen: Transfer
+    },
+    Payment: {
+        screen: Payment
+    },
+    Insurance: {
+        screen: Insurance
+    },
+    Esda: {
+        screen: ESDA
     }
 }
 
 
-const HomeStack = createStackNavigator(screens, );
+const HomeStack = createStackNavigator(screens);
 
 export default createAppContainer(HomeStack);

@@ -8,11 +8,13 @@ import urls from "../axios/config";
 import Loader from "./components/Loader";
 
 export default function PersonalDetails() {
+    const [visible, setvisible] = useState(false)
     const [name, setname] = useState('');
     const [email, setemail] = useState('');
     const [phone, setphone] = useState('');
 
     async function getUserDetails() {
+        setvisible(visible => visible = true);
         let token = await getToken();
         const data = {
             token: token.headers.Authorization.split(" ")[1]
@@ -22,12 +24,19 @@ export default function PersonalDetails() {
             setname(name => name = data[0].fullName);
             setemail(email => email = data[0].email);
             setphone(phone => phone = (data[0].phone));
-        }).catch(e => console.log(e));
+            setvisible(visible => visible = false);
+            console.log('hit');
+        }).catch(e => {
+            console.log(e);
+            setvisible(visible => visible = false);
+        });
     }
 
+    var count = 0
     useEffect(() => {
         getUserDetails();
-    }, [getUserDetails])
+
+    }, [])
     return (
         <SafeAreaView style={styles.container}>
             <View>
@@ -38,7 +47,7 @@ export default function PersonalDetails() {
                     <Text>Save</Text>
                 </TouchableOpacity>
             </View>
-            <Loader title="title" loading={true}/>
+            <Loader message="Loading" loading={visible}/>
         </SafeAreaView>
     )
 }
