@@ -1,6 +1,6 @@
 
 const urls = {
-    BASE: 'https://masterwallet.herokuapp.com'
+    BASE: 'https://masterwallet.herokuapp.com/'
 }
 
 export default urls;

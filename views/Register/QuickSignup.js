@@ -1,11 +1,12 @@
 import React,{useState} from 'react'
-import { SafeAreaView, Text, StyleSheet, Dimensions, LogBox } from 'react-native'
+import { View, Text, StyleSheet, Dimensions } from 'react-native'
 import {  TextInput } from 'react-native-paper';
 import * as Yup from "yup";
 import { Formik, ErrorMessage } from "formik";
 import axios from 'axios';
 import urls from '../../axios/config';
 import { Button, Dialog, Portal, Provider } from 'react-native-paper';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 const { width: WIDTH } = Dimensions.get('window');
@@ -27,16 +28,17 @@ export default function QuickSignup() {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, maxHeight: 500}}>
+        <View style={{ flex: 1, maxHeight: 500}}>
             <Formik enableReinitialize initialValues={{
                 fullname : '',
                 email : "",
                 phone : "",
                 password : "",
                 confirmPass : ""
-            }} validationSchema={validationSchema} onSubmit={(values, {resetForm}) => {
+            }} validationSchema={validationSchema} onSubmit={(values, { resetForm }) => {
+                console.log(values);
                 const data = {
-                    fullName: values.fullname,
+                    fullName: '+232'+values.fullname,
                     email: values.email,
                     phone: values.phone,
                     password: values.password,
@@ -45,13 +47,15 @@ export default function QuickSignup() {
                     answer2: 'answer2'
                 }
                 axios.post(urls.BASE + '/user/quicksignup/', data).then(res => {
+                    console.log("res",res);
                     if (res.status) {
                         console.log(res);
                         setVisible(visible => visible = true);
                         resetForm({fullName: '', phone: '', email: '', password: '', confirmPass: '',});
                     }
                 }).catch(e =>
-                console.log(e));
+                    console.log("err",e));
+                
             }}>
                 {({handleChange, handleBlur, values, handleSubmit}) => (
                     <View>
@@ -66,15 +70,17 @@ export default function QuickSignup() {
                         <Text style={styles.error}><ErrorMessage name="phone" /></Text>
 
 
-                        <TextInput name="password" style={styles.input} label="Password" onChangeText={handleChange('password')} onBlur={handleBlur('password')} value={values.password} />
+                        <TextInput secureTextEntry={true} name="password" style={styles.input} label="Password" onChangeText={handleChange('password')} onBlur={handleBlur('password')} value={values.password} />
                         <Text style={styles.error}><ErrorMessage name="password" /></Text>
 
 
-                        <TextInput name="confirmPass" style={styles.input} label="Confirm Password" onChangeText={handleChange('confirmPass')} onBlur={handleBlur('confirmPass')} value={values.confirmPass} />
+                        <TextInput secureTextEntry={true} name="confirmPass" style={styles.input} label="Confirm Password" onChangeText={handleChange('confirmPass')} onBlur={handleBlur('confirmPass')} value={values.confirmPass} />
                         <Text style={styles.error}><ErrorMessage name="confirmPass" /></Text>
-
-
-                        <Button style={styles.button} onPress={handleSubmit}>Submit</Button>
+                        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                            <View style={styles.buttontext}>
+                                <Text style={styles.buttontext}>Register</Text>
+                            </View>
+                        </TouchableOpacity>
                     </View>
                  )}
             </Formik>
@@ -87,9 +93,8 @@ export default function QuickSignup() {
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
-
             </Provider>
-        </SafeAreaView>
+        </View>
     )
 }
 
@@ -103,8 +108,16 @@ const styles = StyleSheet.create({
         color: '#19D60D'
     },
     button: {
-        marginVertical: 20,
+        borderRadius: 25,
+        paddingHorizontal: 25,
+        paddingVertical: 5,
         backgroundColor: '#19D60D',
+    },
+    buttontext: {
+        marginHorizontal: "auto",
+        color: "#fff",
+        fontSize: 18,
+        textAlign: "center"
     },
     error: {
         color: 'red'

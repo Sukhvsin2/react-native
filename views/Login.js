@@ -1,18 +1,38 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { StyleSheet, View, Text, Image, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import axios from "axios";
 import urls from '../axios/config';
 import { ErrorMessage, Formik } from "formik";
 import { NavigationActions, StackActions } from "react-navigation";
-import DeviceInfo from 'react-native-device-info';
 import * as Yup from "yup";
-
+import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getItem } from 'react-native-shared-preferences';
 
 const { width: WIDTH } = Dimensions.get('window');
 
 
-export default function Login({navigation}) { 
+export default function Login({ navigation }) {
+    
+    async function loginCheck() {
+        let login = await AsyncStorage.getItem('loggedIn');
+        // AsyncStorage.setItem('pin', `false`);
+        let getPin = await AsyncStorage.getItem('pin');
+        console.log("check", getPin);
+        if (login == 'true' && (getPin != 'false' || getPin != null)) {
+            const resetAction = StackActions.reset({
+                index: 0,
+                actions: [NavigationActions.navigate({ routeName: 'Home' })],
+            });
+            navigation.dispatch(resetAction);
+        }
+     }
+
+    useEffect(() => {
+        loginCheck();
+        
+    }, [])
 
     const validationSchema = Yup.object({
         phone: Yup.string().required('Required'),
@@ -28,43 +48,55 @@ export default function Login({navigation}) {
                 initialValues={{ phone: '', password: '' }}
                 validationSchema={validationSchema}
                 onSubmit={(values, { resetForm }) => {
-                    console.log(values);
-                    let deviceId = '';
-                    // DeviceInfo.getUniqueId().then(id => {
-                    //     deviceId = id;
-                    // });
                     const data = {
-                        username: values.phone,
+                        username: '232'+values.phone,
                         password: values.password,
-                        // deviceId: id,
+                        deviceId: Constants.installationId,
                     }
-                    axios.post(urls + '/user/login/', data).then(res => console.log("res", res)).catch(e => console.log(e));
+                    axios.post(urls.BASE + 'user/login/', data).then(async res => {
+                        console.log("res", res.data.token);
+                        AsyncStorage.setItem('token', res.data.token);
+                        AsyncStorage.setItem('phone', '232'+values.phone);
+                        let pin = await AsyncStorage.getItem('pin');
+                        let loggedIn = await AsyncStorage.getItem('loggedIn');
+                        if (loggedIn == 'false') {
+                            AsyncStorage.setItem('loggedIn', 'true');
+                        }
+                        
+                            if (pin == null || pin =='false') {
+                                const resetAction = StackActions.reset({
+                                    index: 0,
+                                    actions: [NavigationActions.navigate({ routeName: 'PinScreen' })],
+                                });
+                                navigation.dispatch(resetAction)
+                            } else {
+                                const resetAction = StackActions.reset({
+                                    index: 0,
+                                    actions: [NavigationActions.navigate({ routeName: 'Home' })],
+                                });
+                                navigation.dispatch(resetAction);
+                            }
+                    }).catch(e => {
+                        console.log('err',e.message);
+                        console.log("cehck");
+                    });
                     resetForm({ phone: '', password: ''});
                 }}
             >
                 {
                     ({handleChange, handleBlur, handleSubmit, values}) => (
                         <View style={styles.form}>
-                            <TextInput style={styles.input} placeholder={'Phone'} onChangeText={handleChange('phone')} onBlur={handleBlur('phone')} value={values.phone}/>
+                            <TextInput keyboardType={"number-pad"} style={styles.input} placeholder={'Phone'} onChangeText={handleChange('phone')} onBlur={handleBlur('phone')} value={values.phone}/>
                             <Text style={styles.error}>
                                 <ErrorMessage name="phone" />
                             </Text>
-                            <TextInput style={styles.input} placeholder={'Password'} onChangeText={handleChange('password')} onBlur={handleBlur('password')} value={values.password} />
+                            <TextInput secureTextEntry={true} style={styles.input} placeholder={'Password'} onChangeText={handleChange('password')} onBlur={handleBlur('password')} value={values.password} />
                             <Text style={styles.error}>
                                 <ErrorMessage name="password" />
                             </Text>
                             <Button style={styles.button} mode="contained" onPress={handleSubmit}>
                                 Login
                             </Button>
-                            <TouchableOpacity onPress={() => {
-                                const resetAction = StackActions.reset({
-                                    index: 0,
-                                    actions: [NavigationActions.navigate({ routeName: 'Home' })],
-                                });
-                                navigation.dispatch(resetAction)
-                            }} style={styles.create}>
-                                <Text style={{fontSize: 16}}>Home</Text>
-                            </TouchableOpacity>
                             <TouchableOpacity onPress={() => {
                                 navigation.navigate('Register');
                             }} style={styles.create}>
